@@ -1,0 +1,4 @@
+29/03:
+	comecei a fazer, a parte de max_crossing_subarray parece estar funcionando
+	bem para subarrays no meio da array principal, ainda não testei o 
+	caso circular direito.
