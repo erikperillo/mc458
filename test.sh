@@ -7,6 +7,9 @@ dir=$1
 program=$dir
 
 cd $dir
+
+make
+
 for test_case in tests/*.in; do
 	echo "--- in $test_case.in ---"
 	echo "program output:"
