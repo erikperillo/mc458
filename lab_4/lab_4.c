@@ -6,6 +6,8 @@ Copyright (C) Erik Perillo <erik.perillo@gmail.com> 2016
 #include <stdlib.h>
 #include <time.h>
 
+#define RND_MIN -1000
+#define RND_MAX 1000
 //gets random number between inclusive interval [min,max]
 #define rng_rand(min, max) (rand() % ((max-min)+1) + min)
 
@@ -111,7 +113,7 @@ int _w_median(int* xs, float* ws, int start, int end,
 //macro for providing arguments for first iteration
 #define w_median(xs, ws, size) _w_median(xs, ws, 0, size, 0.0, 0.0)
 
-int main()
+int main(int argc, char** argv)
 {
 	int i, size, best;
 	int* positions;
@@ -119,18 +121,36 @@ int main()
 
 	srand(time(NULL));
 
-	//reading number of elements
-	scanf("%d", &size);
+	//random array 
+	if(argc > 1)
+	{	
+		size = atoi(argv[1]);
 
-	//getting positions array
-	positions = get_int_arr(size);
-	for(i=0; i<size; i++)
-		scanf("%d", &positions[i]);
+		positions = get_int_arr(size);
+		weights = get_float_arr(size);
 
-	//getting weights array
-	weights = get_float_arr(size);
-	for(i=0; i<size; i++)
-		scanf("%f", &weights[i]);
+		for(i=0; i<size; i++)
+		{
+			positions[i] = rng_rand(RND_MIN, RND_MAX);
+			weights[i] = 0.001*(float)rng_rand(RND_MIN, RND_MAX);
+		}
+	}
+	else
+	//array from input
+	{
+		//reading number of elements
+		scanf("%d", &size);
+
+		//getting positions array
+		positions = get_int_arr(size);
+		for(i=0; i<size; i++)
+			scanf("%d", &positions[i]);
+
+		//getting weights array
+		weights = get_float_arr(size);
+		for(i=0; i<size; i++)
+			scanf("%f", &weights[i]);
+	}
 
 	best = w_median(positions, weights, size);	
 	printf("%d\n", best);
