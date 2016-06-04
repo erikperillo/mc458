@@ -6,8 +6,7 @@ Copyright (C) Erik Perillo <erik.perillo@gmail.com> 2016
 #include <stdlib.h>
 #include <time.h>
 
-#define RND_MIN -1000
-#define RND_MAX 1000
+#define min(a, b) ((a < b)?(a):(b))
 //gets random number between inclusive interval [min,max]
 #define rng_rand(min, max) (rand() % ((max-min)+1) + min)
 
@@ -16,7 +15,7 @@ int* get_int_arr(int size)
 	return (int*)malloc(size*sizeof(int));
 }
 
-void swap_int(int* a, int* b)
+void swap(int* a, int* b)
 {
 	int aux;
 
@@ -25,26 +24,86 @@ void swap_int(int* a, int* b)
 	*b = aux;
 }
 
-int sum(int* arr, int start, int end)
+//partition function for quicksort
+int part(int* arr, int start, int end)
 {
-	int i;
-	int result = 0.0;
-	
-	for(i=start; i<end; i++)
-		result += arr[i];
+	int k;
+	int barrier = start;
+	int pivot = end - 1;
+		
+	for(k=start; k<pivot; k++)
+		if(arr[k] <= arr[pivot])
+			swap(&arr[barrier++], &arr[k]);
 
-	return result;
+	swap(&arr[barrier], &arr[pivot]);
+
+	return barrier;
 }
 
-int best(int* arr, int size)
+//randomized partition for rand_quicksort
+int rand_part(int* arr, int start, int end)
 {
-	return 1;
+	int to_swap;
+	int pivot;
+
+	to_swap = rng_rand(start, end-1);
+	swap(&arr[to_swap], &arr[end-1]);
+
+	pivot = part(arr, start, end);	
+
+	return pivot;
+}
+
+//sorts arr in ascending order
+void rand_quicksort(int* arr, int start, int end)
+{
+	int mid;
+
+	if(end - start < 2)
+		return;
+
+	mid = rand_part(arr, start, end);
+	rand_quicksort(arr, start, mid);	
+	rand_quicksort(arr, mid+1, end);
+}
+
+/*
+main routine. 
+gets the value of best crossing via a greedy choice.
+assumes arr is sorted in ascending order.
+*/
+int _best_crossing(int* arr, int size)
+{
+	int greedy_best;
+
+	if(size == 0)
+		return 0;
+
+	if(size < 3)
+		return arr[size-1];
+
+	if(size == 3)
+		return arr[0] + arr[1] + arr[2];
+
+	greedy_best = min(2*arr[0] + arr[size-1] + arr[size-2], 
+		arr[0] + 2*arr[1] + arr[size-1]);
+
+	return greedy_best + _best_crossing(arr, size-2);
+}
+
+//sorts arr and calls _best_crossing. 
+int best_crossing(int* arr, int size)
+{
+	rand_quicksort(arr, 0, size);
+	return _best_crossing(arr, size);
 }
 
 int main(int argc, char** argv)
 {
 	int i, size, min_time;
 	int* times;
+
+	srand(time(NULL));
 
 	//getting array size
 	scanf("%d", &size);
@@ -55,7 +114,7 @@ int main(int argc, char** argv)
 		scanf("%d", &times[i]);
 
 	//getting solution
-	min_time = best(times, size);
+	min_time = best_crossing(times, size);
 	printf("%d\n", min_time);
 
 	free(times);
